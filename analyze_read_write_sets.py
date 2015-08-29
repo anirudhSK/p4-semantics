@@ -7,6 +7,9 @@ from p4_hlir.hlir.p4_imperatives import P4_WRITE
 from p4_hlir.hlir.p4_imperatives import P4_READ_WRITE
 from sets import Set
 
+# N.B. Formal parameters are the parameters in a function signature
+# Actual parameters are the parameters passed in a function call
+
 # Pretty print primitive action invocation
 def pretty_print_primitive(action_primitive_invocation):
   # Check that this is really an action primitive and
@@ -21,8 +24,7 @@ def pretty_print_primitive(action_primitive_invocation):
 # Get set of variables from an actual parameter passed
 # to a P4 action primitive
 # In most cases, this just calls str() on the actual parameter object
-# With field_list_calc and field_lists, we need to recurse one level
-# deeper and return a set
+# With field_list_calc and field_lists, we need to recurse two levels and one level respectively
 def gen_parameter_set(actual_parameter):
   var_set = Set();
   if (isinstance(actual_parameter, p4_field_list_calculation)):
@@ -41,18 +43,18 @@ def gen_parameter_set(actual_parameter):
 # Get set of variables for a particular invocation
 # of an action primitive
 def get_var_set(action_primitive_invocation, var_type):
-  # Store all reads for the action_primitive_invocation
+  # Store all reads/writes (depending on var_type) for the action_primitive_invocation
   var_set = Set()
 
   # Check that this is really an action primitive and
-  # doesn't net any other actions within it.
+  # doesn't nest any other actions within it.
   action_primitive = action_primitive_invocation[0]
   assert(action_primitive.flat_call_sequence == [])
 
   # Get actual parameters for this invocation
   actual_parameters= action_primitive_invocation[1]
 
-  # Get formal parameters for this action primitive
+  # Get formal parameters for this action primitive from its signature
   formal_parameters = action_primitive.signature
 
   # <= because the formal_parameters might have optional
@@ -61,8 +63,7 @@ def get_var_set(action_primitive_invocation, var_type):
 
   # Collect either read or write sets
   for i in range(0, len(actual_parameters)):
-    # field list and field list calc need special care,
-    # But both have to be READ objects
+    # assert that field list and field list calc objects are READ objects
     if (isinstance(actual_parameters[i], p4_field_list_calculation)):
       assert(action_primitive.signature_flags[formal_parameters[i]]['access'] == P4_READ)
     if (isinstance(actual_parameters[i], p4_field_list)):
@@ -86,7 +87,7 @@ def analyze_read_write_sets(complex_action):
   read_sets  = []
   write_sets = []
   for action_primitive in complex_action.flat_call_sequence:
-    read_sets += [(action_primitive, get_var_set(action_primitive, "read"))]
+    read_sets  += [(action_primitive, get_var_set(action_primitive, "read"))]
     write_sets += [(action_primitive, get_var_set(action_primitive, "write"))]
 
   # Check for pairwise intersection of these sets
@@ -94,7 +95,7 @@ def analyze_read_write_sets(complex_action):
   flag = False;
   for i in range(0, len(complex_action.flat_call_sequence)):
     for j in range(i, len(complex_action.flat_call_sequence)):
-      if (((read_sets[i][1] & write_sets[j][1]) != Set([])) or (write_sets[i][1] & read_sets[j][1])) :
+      if (((read_sets[i][1] & write_sets[j][1]) != Set([])) or ((write_sets[i][1] & read_sets[j][1]) != Set([]))) :
         print >> sys.stderr, "Flagging intersection between action_primitives "
         print >> sys.stderr, "@ location: ", i, pretty_print_primitive(complex_action.flat_call_sequence[i])
         print >> sys.stderr, "@ location: ", j, pretty_print_primitive(complex_action.flat_call_sequence[j])
@@ -110,6 +111,8 @@ if __name__ == "__main__":
   actions = h.p4_actions
 
   # Accumulate all complex actions (user-defined actions)
+  # These are actions where the flat_call_sequence is not empty
+  # Otherwise, it would be a primitive.
   complex_actions = []
   for a in actions:
     if (actions[a].flat_call_sequence != []):
