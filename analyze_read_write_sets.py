@@ -95,9 +95,9 @@ def analyze_read_write_sets(complex_action):
   for i in range(0, len(complex_action.flat_call_sequence)):
     for j in range(i, len(complex_action.flat_call_sequence)):
       if (((read_sets[i][1] & write_sets[j][1]) != Set([])) or (write_sets[i][1] & read_sets[j][1])) :
-        print >> sys.stderr, "Flagging intersection between action_primitives ",
-        print >> sys.stderr, pretty_print_primitive(complex_action.flat_call_sequence[i]), " and ",
-        print >> sys.stderr, pretty_print_primitive(complex_action.flat_call_sequence[j]),
+        print >> sys.stderr, "Flagging intersection between action_primitives "
+        print >> sys.stderr, "@ location: ", i, pretty_print_primitive(complex_action.flat_call_sequence[i])
+        print >> sys.stderr, "@ location: ", j, pretty_print_primitive(complex_action.flat_call_sequence[j])
         flag = True
   if (flag == False):
     print >> sys.stderr, " no read/write intersection",
