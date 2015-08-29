@@ -7,33 +7,6 @@ from p4_hlir.hlir.p4_imperatives import P4_WRITE
 from p4_hlir.hlir.p4_imperatives import P4_READ_WRITE
 from sets import Set
 
-h = HLIR(sys.argv[1])
-h.build()
-actions = h.p4_actions
-
-# Accumulate all complex actions (user-defined actions)
-complex_actions = []
-for a in actions:
-  if (actions[a].flat_call_sequence != []):
-    complex_actions += [actions[a]]
-
-# Pretty print complex action
-def pretty_print_complex(complex_action):
-  assert(complex_action.flat_call_sequence != [])
-  ret_str = ""
-  ret_str += complex_action.name + "(" + ",".join(complex_action.signature) + ")" + "{\n"
-  for action_primitive_invocation in complex_action.flat_call_sequence :
-    # Check that this is really an action primitive and
-    # doesn't net any other actions within it.
-    action_primitive = action_primitive_invocation[0]
-    assert(action_primitive.flat_call_sequence == [])
-
-    # Get actual parameters for this invocation
-    actual_parameters= action_primitive_invocation[1]
-    ret_str += "  " + action_primitive.name + "(" + ",".join([str(p) for p in actual_parameters]) + ");\n";
-  ret_str += "}\n";
-  return ret_str
-
 # Pretty print primitive action invocation
 def pretty_print_primitive(action_primitive_invocation):
   # Check that this is really an action primitive and
@@ -130,5 +103,17 @@ def analyze_read_write_sets(complex_action):
     print >> sys.stderr, " no read/write intersection",
   print >> sys.stderr
 
-for complex_action in complex_actions:
-  analyze_read_write_sets(complex_action)
+if __name__ == "__main__":
+  # Build HLIR
+  h = HLIR(sys.argv[1])
+  h.build()
+  actions = h.p4_actions
+
+  # Accumulate all complex actions (user-defined actions)
+  complex_actions = []
+  for a in actions:
+    if (actions[a].flat_call_sequence != []):
+      complex_actions += [actions[a]]
+
+  for complex_action in complex_actions:
+    analyze_read_write_sets(complex_action)
