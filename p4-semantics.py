@@ -82,23 +82,28 @@ def get_var_set(action_primitive_invocation, var_type):
 
   return var_set
 
-def analyze_read_write_sets(complex_action):
-  # Maintain read and write sets for each primitive action in a complex_action
+def analyze_read_write_sets(compound_action):
+  # Maintain read and write sets for each primitive action in a compound_action
   read_sets  = []
   write_sets = []
-  for action_primitive in complex_action.flat_call_sequence:
+  for action_primitive in compound_action.flat_call_sequence:
     read_sets  += [(action_primitive, get_var_set(action_primitive, "read"))]
     write_sets += [(action_primitive, get_var_set(action_primitive, "write"))]
 
   # Check for pairwise intersection of these sets
-  print >> sys.stderr, "complex_action is ", complex_action.name,
+  print >> sys.stderr, "compound_action is ", compound_action.name,
   flag = False;
-  for i in range(0, len(complex_action.flat_call_sequence)):
-    for j in range(i, len(complex_action.flat_call_sequence)):
+  for i in range(0, len(compound_action.flat_call_sequence)):
+    for j in range(i, len(compound_action.flat_call_sequence)):
       if (((read_sets[i][1] & write_sets[j][1]) != Set([])) or ((write_sets[i][1] & read_sets[j][1]) != Set([]))) :
-        print >> sys.stderr, "Flagging intersection between action_primitives "
-        print >> sys.stderr, "@ location: ", i, pretty_print_primitive(complex_action.flat_call_sequence[i])
-        print >> sys.stderr, "@ location: ", j, pretty_print_primitive(complex_action.flat_call_sequence[j])
+        print >> sys.stderr, "Flagging read/write intersection between action_primitives "
+        print >> sys.stderr, "@ location", i, ":", pretty_print_primitive(compound_action.flat_call_sequence[i])
+        print >> sys.stderr, "@ location", j, ":", pretty_print_primitive(compound_action.flat_call_sequence[j])
+        flag = True
+      elif (((write_sets[i][1] & write_sets[j][1]) != Set([])) and (i != j)):
+        print >> sys.stderr, "Flagging write/write intersection between action_primitives "
+        print >> sys.stderr, "@ location", i, ":", pretty_print_primitive(compound_action.flat_call_sequence[i])
+        print >> sys.stderr, "@ location", j, ":", pretty_print_primitive(compound_action.flat_call_sequence[j])
         flag = True
   if (flag == False):
     print >> sys.stderr, " no read/write intersection",
@@ -110,13 +115,13 @@ if __name__ == "__main__":
   h.build()
   actions = h.p4_actions
 
-  # Accumulate all complex actions (user-defined actions)
+  # Accumulate all compound actions (user-defined actions)
   # These are actions where the flat_call_sequence is not empty
   # Otherwise, it would be a primitive.
-  complex_actions = []
+  compound_actions = []
   for a in actions:
     if (actions[a].flat_call_sequence != []):
-      complex_actions += [actions[a]]
+      compound_actions += [actions[a]]
 
-  for complex_action in complex_actions:
-    analyze_read_write_sets(complex_action)
+  for compound_action in compound_actions:
+    analyze_read_write_sets(compound_action)
