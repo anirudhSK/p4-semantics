@@ -1,0 +1,222 @@
+compound_action is  set_egress_packet_vlan_tagged Flagging read/write intersection between action_primitives 
+@ location 1 : modify_field(vlan_tag_[0].etherType,ethernet.etherType);
+@ location 3 : modify_field(ethernet.etherType,33024);
+
+compound_action is  terminate_tunnel_inner_ethernet_ipv4 Flagging read/write intersection between action_primitives 
+@ location 3 : modify_field(qos_metadata.outer_dscp,l3_metadata.lkp_ip_tc);
+@ location 11 : modify_field(l3_metadata.lkp_ip_tc,inner_ipv4.diffserv);
+
+compound_action is  terminate_tunnel_inner_ipv4 Flagging read/write intersection between action_primitives 
+@ location 2 : modify_field(qos_metadata.outer_dscp,l3_metadata.lkp_ip_tc);
+@ location 7 : modify_field(l3_metadata.lkp_ip_tc,inner_ipv4.diffserv);
+
+compound_action is  terminate_tunnel_inner_ethernet_ipv6 Flagging read/write intersection between action_primitives 
+@ location 3 : modify_field(qos_metadata.outer_dscp,l3_metadata.lkp_ip_tc);
+@ location 11 : modify_field(l3_metadata.lkp_ip_tc,inner_ipv6.trafficClass);
+
+compound_action is  terminate_tunnel_inner_ipv6 Flagging read/write intersection between action_primitives 
+@ location 2 : modify_field(qos_metadata.outer_dscp,l3_metadata.lkp_ip_tc);
+@ location 7 : modify_field(l3_metadata.lkp_ip_tc,inner_ipv6.trafficClass);
+
+compound_action is  decap_vxlan_inner_ipv4 Flagging read/write intersection between action_primitives 
+@ location 0 : copy_header(ethernet,inner_ethernet);
+@ location 5 : remove_header(inner_ethernet);
+Flagging read/write intersection between action_primitives 
+@ location 1 : copy_header(ipv4,inner_ipv4);
+@ location 6 : remove_header(inner_ipv4);
+
+compound_action is  decap_vxlan_inner_ipv6 Flagging read/write intersection between action_primitives 
+@ location 0 : copy_header(ethernet,inner_ethernet);
+@ location 5 : remove_header(inner_ethernet);
+Flagging read/write intersection between action_primitives 
+@ location 1 : copy_header(ipv6,inner_ipv6);
+@ location 6 : remove_header(inner_ipv6);
+
+compound_action is  decap_genv_inner_ipv4 Flagging read/write intersection between action_primitives 
+@ location 0 : copy_header(ethernet,inner_ethernet);
+@ location 5 : remove_header(inner_ethernet);
+Flagging read/write intersection between action_primitives 
+@ location 1 : copy_header(ipv4,inner_ipv4);
+@ location 6 : remove_header(inner_ipv4);
+
+compound_action is  decap_genv_inner_ipv6 Flagging read/write intersection between action_primitives 
+@ location 0 : copy_header(ethernet,inner_ethernet);
+@ location 5 : remove_header(inner_ethernet);
+Flagging read/write intersection between action_primitives 
+@ location 1 : copy_header(ipv6,inner_ipv6);
+@ location 6 : remove_header(inner_ipv6);
+
+compound_action is  decap_nvgre_inner_ipv4 Flagging read/write intersection between action_primitives 
+@ location 0 : copy_header(ethernet,inner_ethernet);
+@ location 5 : remove_header(inner_ethernet);
+Flagging read/write intersection between action_primitives 
+@ location 1 : copy_header(ipv4,inner_ipv4);
+@ location 6 : remove_header(inner_ipv4);
+
+compound_action is  decap_nvgre_inner_ipv6 Flagging read/write intersection between action_primitives 
+@ location 0 : copy_header(ethernet,inner_ethernet);
+@ location 5 : remove_header(inner_ethernet);
+Flagging read/write intersection between action_primitives 
+@ location 1 : copy_header(ipv6,inner_ipv6);
+@ location 6 : remove_header(inner_ipv6);
+
+compound_action is  decap_ip_inner_ipv4 Flagging read/write intersection between action_primitives 
+@ location 0 : copy_header(ipv4,inner_ipv4);
+@ location 3 : remove_header(inner_ipv4);
+
+compound_action is  decap_ip_inner_ipv6 Flagging read/write intersection between action_primitives 
+@ location 0 : copy_header(ipv6,inner_ipv6);
+@ location 3 : remove_header(inner_ipv6);
+
+compound_action is  decap_mpls_inner_ipv4_pop1 Flagging read/write intersection between action_primitives 
+@ location 1 : copy_header(ipv4,inner_ipv4);
+@ location 2 : remove_header(inner_ipv4);
+
+compound_action is  decap_mpls_inner_ipv6_pop1 Flagging read/write intersection between action_primitives 
+@ location 1 : copy_header(ipv6,inner_ipv6);
+@ location 2 : remove_header(inner_ipv6);
+
+compound_action is  decap_mpls_inner_ethernet_ipv4_pop1 Flagging read/write intersection between action_primitives 
+@ location 1 : copy_header(ethernet,inner_ethernet);
+@ location 3 : remove_header(inner_ethernet);
+Flagging read/write intersection between action_primitives 
+@ location 2 : copy_header(ipv4,inner_ipv4);
+@ location 4 : remove_header(inner_ipv4);
+
+compound_action is  decap_mpls_inner_ethernet_ipv6_pop1 Flagging read/write intersection between action_primitives 
+@ location 1 : copy_header(ethernet,inner_ethernet);
+@ location 3 : remove_header(inner_ethernet);
+Flagging read/write intersection between action_primitives 
+@ location 2 : copy_header(ipv6,inner_ipv6);
+@ location 4 : remove_header(inner_ipv6);
+
+compound_action is  decap_mpls_inner_ethernet_non_ip_pop1 Flagging read/write intersection between action_primitives 
+@ location 1 : copy_header(ethernet,inner_ethernet);
+@ location 2 : remove_header(inner_ethernet);
+
+compound_action is  decap_mpls_inner_ipv4_pop2 Flagging read/write intersection between action_primitives 
+@ location 2 : copy_header(ipv4,inner_ipv4);
+@ location 3 : remove_header(inner_ipv4);
+
+compound_action is  decap_mpls_inner_ipv6_pop2 Flagging read/write intersection between action_primitives 
+@ location 2 : copy_header(ipv6,inner_ipv6);
+@ location 3 : remove_header(inner_ipv6);
+
+compound_action is  decap_mpls_inner_ethernet_ipv4_pop2 Flagging read/write intersection between action_primitives 
+@ location 2 : copy_header(ethernet,inner_ethernet);
+@ location 4 : remove_header(inner_ethernet);
+Flagging read/write intersection between action_primitives 
+@ location 3 : copy_header(ipv4,inner_ipv4);
+@ location 5 : remove_header(inner_ipv4);
+
+compound_action is  decap_mpls_inner_ethernet_ipv6_pop2 Flagging read/write intersection between action_primitives 
+@ location 2 : copy_header(ethernet,inner_ethernet);
+@ location 4 : remove_header(inner_ethernet);
+Flagging read/write intersection between action_primitives 
+@ location 3 : copy_header(ipv6,inner_ipv6);
+@ location 5 : remove_header(inner_ipv6);
+
+compound_action is  decap_mpls_inner_ethernet_non_ip_pop2 Flagging read/write intersection between action_primitives 
+@ location 2 : copy_header(ethernet,inner_ethernet);
+@ location 3 : remove_header(inner_ethernet);
+
+compound_action is  decap_mpls_inner_ipv4_pop3 Flagging read/write intersection between action_primitives 
+@ location 3 : copy_header(ipv4,inner_ipv4);
+@ location 4 : remove_header(inner_ipv4);
+
+compound_action is  decap_mpls_inner_ipv6_pop3 Flagging read/write intersection between action_primitives 
+@ location 3 : copy_header(ipv6,inner_ipv6);
+@ location 4 : remove_header(inner_ipv6);
+
+compound_action is  decap_mpls_inner_ethernet_ipv4_pop3 Flagging read/write intersection between action_primitives 
+@ location 3 : copy_header(ethernet,inner_ethernet);
+@ location 5 : remove_header(inner_ethernet);
+Flagging read/write intersection between action_primitives 
+@ location 4 : copy_header(ipv4,inner_ipv4);
+@ location 6 : remove_header(inner_ipv4);
+
+compound_action is  decap_mpls_inner_ethernet_ipv6_pop3 Flagging read/write intersection between action_primitives 
+@ location 3 : copy_header(ethernet,inner_ethernet);
+@ location 5 : remove_header(inner_ethernet);
+Flagging read/write intersection between action_primitives 
+@ location 4 : copy_header(ipv6,inner_ipv6);
+@ location 6 : remove_header(inner_ipv6);
+
+compound_action is  decap_mpls_inner_ethernet_non_ip_pop3 Flagging read/write intersection between action_primitives 
+@ location 3 : copy_header(ethernet,inner_ethernet);
+@ location 4 : remove_header(inner_ethernet);
+
+compound_action is  decap_inner_udp Flagging read/write intersection between action_primitives 
+@ location 0 : copy_header(udp,inner_udp);
+@ location 1 : remove_header(inner_udp);
+
+compound_action is  decap_inner_tcp Flagging read/write intersection between action_primitives 
+@ location 0 : copy_header(tcp,inner_tcp);
+@ location 1 : remove_header(inner_tcp);
+
+compound_action is  decap_inner_icmp Flagging read/write intersection between action_primitives 
+@ location 0 : copy_header(icmp,inner_icmp);
+@ location 1 : remove_header(inner_icmp);
+
+compound_action is  inner_ipv4_udp_rewrite Flagging read/write intersection between action_primitives 
+@ location 0 : copy_header(inner_ipv4,ipv4);
+@ location 4 : remove_header(ipv4);
+Flagging read/write intersection between action_primitives 
+@ location 1 : copy_header(inner_udp,udp);
+@ location 3 : remove_header(udp);
+
+compound_action is  inner_ipv4_tcp_rewrite Flagging read/write intersection between action_primitives 
+@ location 0 : copy_header(inner_ipv4,ipv4);
+@ location 4 : remove_header(ipv4);
+Flagging read/write intersection between action_primitives 
+@ location 1 : copy_header(inner_tcp,tcp);
+@ location 3 : remove_header(tcp);
+
+compound_action is  inner_ipv4_icmp_rewrite Flagging read/write intersection between action_primitives 
+@ location 0 : copy_header(inner_ipv4,ipv4);
+@ location 4 : remove_header(ipv4);
+Flagging read/write intersection between action_primitives 
+@ location 1 : copy_header(inner_icmp,icmp);
+@ location 3 : remove_header(icmp);
+
+compound_action is  inner_ipv4_unknown_rewrite Flagging read/write intersection between action_primitives 
+@ location 0 : copy_header(inner_ipv4,ipv4);
+@ location 2 : remove_header(ipv4);
+
+compound_action is  inner_ipv6_udp_rewrite Flagging read/write intersection between action_primitives 
+@ location 0 : copy_header(inner_ipv6,ipv6);
+@ location 3 : remove_header(ipv6);
+
+compound_action is  inner_ipv6_tcp_rewrite Flagging read/write intersection between action_primitives 
+@ location 0 : copy_header(inner_ipv6,ipv6);
+@ location 4 : remove_header(ipv6);
+Flagging read/write intersection between action_primitives 
+@ location 1 : copy_header(inner_tcp,tcp);
+@ location 3 : remove_header(tcp);
+
+compound_action is  inner_ipv6_icmp_rewrite Flagging read/write intersection between action_primitives 
+@ location 0 : copy_header(inner_ipv6,ipv6);
+@ location 4 : remove_header(ipv6);
+Flagging read/write intersection between action_primitives 
+@ location 1 : copy_header(inner_icmp,icmp);
+@ location 3 : remove_header(icmp);
+
+compound_action is  inner_ipv6_unknown_rewrite Flagging read/write intersection between action_primitives 
+@ location 0 : copy_header(inner_ipv6,ipv6);
+@ location 2 : remove_header(ipv6);
+
+compound_action is  ipv4_gre_rewrite Flagging read/write intersection between action_primitives 
+@ location 1 : modify_field(gre.proto,ethernet.etherType);
+@ location 8 : modify_field(ethernet.etherType,2048);
+
+compound_action is  cpu_rx_rewrite Flagging read/write intersection between action_primitives 
+@ location 11 : modify_field(fabric_payload_header.etherType,ethernet.etherType);
+@ location 12 : modify_field(ethernet.etherType,36864);
+
+compound_action is  fabric_unicast_rewrite Flagging read/write intersection between action_primitives 
+@ location 16 : modify_field(fabric_payload_header.etherType,ethernet.etherType);
+@ location 17 : modify_field(ethernet.etherType,36864);
+
+compound_action is  fabric_multicast_rewrite Flagging read/write intersection between action_primitives 
+@ location 16 : modify_field(fabric_payload_header.etherType,ethernet.etherType);
+@ location 17 : modify_field(ethernet.etherType,36864);
