@@ -1,0 +1,183 @@
+\documentclass[aspectratio=169]{beamer}
+\usetheme{Dresden}
+\usecolortheme{beaver}
+\usepackage{textcomp}
+\usepackage[export]{adjustbox}
+\usepackage{color}
+\usepackage{colortbl}
+\usepackage{pbox}
+\setbeamerfont{page number in head/foot}{size=\large}
+\setbeamertemplate{footline}[frame number]
+\title{P4's action-execution semantics and conditional operators}
+\author{Anirudh Sivaraman}
+\institute{Massachusetts Institute of Technology}
+\date{}
+
+\begin{document}
+
+\begin{frame}
+
+  \titlepage
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{P4's action-execution semantics}
+  \begin{enumerate}
+    \item<1-> Consider the statements:
+      \begin{texttt} \\
+        \ \ \ \ modify\_field(\textcolor{red}{hdr.fieldA}, 1); \\
+        \ \ \ \ modify\_field(hdr.fieldB, \textcolor{red}{hdr.fieldA}); \\
+      \end{texttt}
+    \item<2-> Assume \texttt{hdr.fieldA = 0} initially.
+    \item<3-> If executed sequentially: \texttt{hdr.fieldB = 1}.
+    \item<4-> P4's semantics (7.1.1 of rc1 draft): ``Both actions are started at the same time.''
+    \item<5-> \texttt{hdr.fieldB = 0}.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Parallel semantics can be unintuitive}
+  \begin{enumerate}
+  \item<1-> Feedback from P4 tutorial at SIGCOMM.
+  \item<2-> Ben Pfaff's email:
+  ``I don't think I'd noticed anything about parallel versus serial
+    semantics before; maybe it is new.  It will take some care in a
+    software implementation.''
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Proposal: Change action execution semantics to sequential}
+  \begin{enumerate}
+  \item<1-> Does this break any existing code?
+  \item<2-> Are programmers already using sequential semantics?
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Analyzing programmer intent in existing P4 programs}
+  \begin{enumerate}
+    \item<1-> Python script that uses the p4-hlir python module.
+    \item<2-> Analyze read and write sets for each action primitive in a compound action.
+      \begin{texttt} \\
+        \ \ \ \ modify\_field(\textcolor{red}{hdr.fieldA}, 1); \\
+        \ \ \ \ modify\_field(hdr.fieldB, \textcolor{red}{hdr.fieldA}); \\
+      \end{texttt}
+    \item<3-> Read  sets = \{\}, \{hdr.fieldA\}
+    \item<4-> Write sets = \{hdr.fieldA\}, \{hdr.fieldB\}
+    \item<5-> Read set for compound action = \{hdr.fieldA\}
+    \item<6-> Write set for compound action = \{hdr.fieldA, hdr.fieldB\}
+    \item<7-> Intersection of read/write sets = \{hdr.fieldA\} 
+    \item<8-> Flag any compound action with an intersection between the read and write set.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Results on p4lang/p4factory/targets/switch.p4}
+  \begin{enumerate}
+    \item<1-> 211 compound actions.
+    \item<2-> 163 with no read/write set intersection.
+    \item<3-> 48 with non-null read write set intersection.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Digging deeper}
+  \begin{enumerate}
+    \item<1-> Of the flagged 48, 43 have write-after-read dependencies.
+      \begin{texttt}
+      terminate\_tunnel\_inner\_ethernet\_ipv4 \{ \\
+        \ \ \ \ modify\_field(qos\_metadata.outer\_dscp,\textcolor{red}{l3\_metadata.lkp\_ip\_tc}); \\
+        \ \ \ \ modify\_field(\textcolor{red}{l3\_metadata.lkp\_ip\_tc},inner\_ipv4.diffserv); \\
+      \}
+      \end{texttt}
+
+      \begin{texttt}
+      decap\_vxlan\_inner\_ipv6 \{ \\
+        \ \ \ \  copy\_header(ethernet,\textcolor{red}{inner\_ethernet}); \\
+        \ \ \ \  remove\_header(\textcolor{red}{inner\_ethernet}); \\
+      \}
+    \end{texttt}
+    \item<2-> Will work with both parallel and sequential semantics.
+    \item<3-> Sequential makes the intent clearer.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Digging deeper}
+  \begin{enumerate}
+    \item<1-> 5 were written using sequential semantics.\\
+      \begin{scriptsize}
+      \begin{texttt}
+        egress\_port\_mirror \{  \\
+        \ \ \ \  modify\_field(\textcolor{red}{i2e\_metadata.mirror\_session\_id}, session\_id); \\
+        \ \ \ \  clone\_egress\_pkt\_to\_egress(session\_id, \textcolor{blue}{p4\_field\_list.e2e\_mirror\_info}); \\
+        \}
+
+        \textcolor{blue}{field\_list e2e\_mirror\_info} \{ \\
+          \ \ \ \ \textcolor{red}{i2e\_metadata.mirror\_session\_id}; \\
+        \}
+      \end{texttt}
+      \end{scriptsize}
+    \item<2-> (May have cleverly exploited parallel semantics,
+               but checked that sequential was the author's intent).
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{What we learned from switch.p4}
+  \begin{enumerate}
+    \item<1-> Switching to sequential semantics is unlikely to break switch.p4.
+    \item<2-> P4 programmers already use sequential semantics.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{We don't lose any expressive power}
+  \begin{enumerate}
+  \item<1-> Any thing that's parallel (e.g. swap) can be expressed with a sequential construct.
+    \begin{texttt} \\
+    \ \ \ \   pkt.a = pkt.b; \\
+    \ \ \ \   pkt.b = pkt.a; \\
+    \end{texttt}
+    becomes
+    \begin{texttt} \\
+    \ \ \ \   pkt.tmp = pkt.a; \\
+    \ \ \ \   pkt.a = pkt.b; \\
+    \ \ \ \   pkt.b = pkt.tmp; \\
+    \end{texttt}
+  \item<2-> Many things cannot be done with just parallel statements e.g. atomic read, modify, write.
+    \begin{texttt} \\
+    \ \ \ \   pkt.tmp = register; \\
+    \ \ \ \   pkt.tmp = pkt.tmp  + 1; \\
+    \ \ \ \   register = pkt.tmp; \\
+    \end{texttt}
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Conclusion}
+  \begin{enumerate}
+    \item<1-> We don't lose anything by switching to sequential semantics.
+    \item<2-> Natural for programmers.
+    \item<3-> Analysis script, results, and slides available at: https://github.com/anirudhSK/p4-semantics
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{One last thing: The conditional operator}
+  \begin{enumerate}
+    \item<1-> Section 2.6 of rc1 proposes min/max operatrors
+    \item<2-> The min operator expressed as code is
+      \begin{verbatim}
+      (arith_expr1 < arith_expr2) ? arith_expr1 : arith_expr2;
+      \end{verbatim}
+    \item<3-> I propose we generalize this to:
+      \begin{verbatim}
+      (bool_expr) ? arith_expr1 : arith_expr2;
+      \end{verbatim}
+  \end{enumerate}
+\end{frame}
+
+\end{document}
