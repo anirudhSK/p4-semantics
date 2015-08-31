@@ -1,0 +1,22 @@
+compound_action is  acl_mirror Flagging read/write intersection between action_primitives 
+@ location 0 : modify_field(i2e_metadata.mirror_session_id,sig(0));
+@ location 3 : clone_ingress_pkt_to_egress(sig(0),p4_field_list.i2e_mirror_info);
+Flagging read/write intersection between action_primitives 
+@ location 1 : modify_field(i2e_metadata.ingress_tstamp,intrinsic_metadata.ingress_global_tstamp);
+@ location 3 : clone_ingress_pkt_to_egress(sig(0),p4_field_list.i2e_mirror_info);
+
+compound_action is  negative_mirror Flagging read/write intersection between action_primitives 
+@ location 0 : modify_field(ingress_metadata.drop_reason,sig(1));
+@ location 1 : clone_ingress_pkt_to_egress(sig(0),p4_field_list.mirror_info);
+
+compound_action is  copy_to_cpu Flagging read/write intersection between action_primitives 
+@ location 0 : modify_field(fabric_metadata.reason_code,sig(0));
+@ location 1 : clone_ingress_pkt_to_egress(250,p4_field_list.cpu_info);
+
+compound_action is  egress_port_mirror Flagging read/write intersection between action_primitives 
+@ location 0 : modify_field(i2e_metadata.mirror_session_id,sig(0));
+@ location 1 : clone_egress_pkt_to_egress(sig(0),p4_field_list.e2e_mirror_info);
+
+compound_action is  egress_port_mirror_drop Flagging read/write intersection between action_primitives 
+@ location 0 : modify_field(i2e_metadata.mirror_session_id,sig(0));
+@ location 1 : clone_egress_pkt_to_egress(sig(0),p4_field_list.e2e_mirror_info);
