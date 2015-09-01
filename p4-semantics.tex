@@ -198,13 +198,17 @@
   \begin{enumerate}
     \item<1-> Section 2.6 of rc1 proposes min/max operatrors
     \item<2-> The min operator expressed as code is
+      \begin{scriptsize}
       \begin{verbatim}
       (arith_expr1 < arith_expr2) ? arith_expr1 : arith_expr2;
       \end{verbatim}
+    \end{scriptsize}
     \item<3-> I propose we generalize this to:
+      \begin{scriptsize}
       \begin{verbatim}
       (bool_expr) ? arith_expr1 : arith_expr2;
       \end{verbatim}
+    \end{scriptsize}
   \end{enumerate}
 \end{frame}
 
