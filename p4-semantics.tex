@@ -157,10 +157,38 @@
 \end{frame}
 
 \begin{frame}[fragile]
+  \frametitle{Does this complicate the compiler?}
+  \begin{enumerate}
+    \item<1-> Yes, the compiler backend might need to gracefully reject some code.
+    \item<2-> Backend will limit the longest dependency chain within a compound action.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{But expressions (2.6 of rc1 draft) cause the same problem anyway}
+    \begin{enumerate}
+    \item<1-> For instance,
+      \begin{texttt} \\
+      \ \ \ \ pkt.a = (pkt.b + (pkt.c - (pkt.d \textless\textless (pkt.e \textgreater\textgreater pkt.f)))); \\
+      \end{texttt}
+      is valid P4 code, which some backends will reject.
+    \item<2-> It's equivalent to this sequential version
+      \begin{texttt} \\
+      \ \ \ \ pkt.tmp1 = pkt.e \textgreater\textgreater pkt.f; \\
+      \ \ \ \ pkt.tmp2 = pkt.d \textless\textless pkt.tmp1; \\
+      \ \ \ \ pkt.tmp3 = pkt.c - pkt.tmp2; \\
+      \ \ \ \ pkt.a    = pkt.b + pkt.tmp3; \\
+    \end{texttt}
+   \item<3-> Can transform the second into the first by propagating expressions.
+   \item<4-> I think rejecting sequential code is no worse than rejecting complex expressions.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]
   \frametitle{Conclusion}
   \begin{enumerate}
-    \item<1-> We don't lose anything by switching to sequential semantics.
-    \item<2-> Natural for programmers.
+    \item<1-> As P4 programmers, we don't lose anything (and gain quite a bit) by switching to sequential semantics.
+    \item<2-> The compiler needs a little more work, which is going to happen anyway.
     \item<3-> Analysis script, results, and slides available at: https://github.com/anirudhSK/p4-semantics
   \end{enumerate}
 \end{frame}
