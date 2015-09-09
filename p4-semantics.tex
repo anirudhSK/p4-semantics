@@ -121,7 +121,25 @@
       \end{texttt}
       \end{scriptsize}
     \item<2-> (May have cleverly exploited parallel semantics,
-               but checked that sequential was the author's intent).
+               but I checked that sequential was the author's intent).
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Another example that the script doesn't yet handle}
+  \begin{enumerate}
+    \item \texttt{add\_header} followed by \texttt{modify\_field}.
+    \begin{texttt}\\
+      action f\_insert\_vxlan\_header() \{ \\
+      \ \ \ \  \dots \\
+      \ \ \ \  add\_header(vxlan); \\
+      \ \ \ \  \dots \\
+      \ \ \ \  modify\_field(vxlan.flags, 0x8); \\
+      \}
+    \end{texttt}
+    \item Spec for add\_header, ``If the header instance was invalid, all its fields are initialized to 0.''
+    \item If vxlan header is invalid, f\_insert\_vxlan\_header writes both 0 and 8 into vxlan.flags.
+    \item Unless, the programmer assumed sequential semantics.
   \end{enumerate}
 \end{frame}
 
@@ -129,7 +147,7 @@
   \frametitle{What we learned from switch.p4}
   \begin{enumerate}
     \item<1-> Switching to sequential semantics is unlikely to break switch.p4.
-    \item<2-> P4 programmers already use sequential semantics.
+    \item<2-> P4 programmers already use sequential semantics inadvertently.
   \end{enumerate}
 \end{frame}
 
